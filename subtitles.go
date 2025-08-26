@@ -146,6 +146,72 @@ type Color struct {
 	Alpha, Blue, Green, Red uint8
 }
 
+func newColorFromVTTClass(color string) (*Color, error) {
+	switch color {
+	case "black":
+		return ColorBlack, nil
+	case "red":
+		return ColorRed, nil
+	case "green":
+		return ColorGreen, nil
+	case "yellow":
+		return ColorYellow, nil
+	case "blue":
+		return ColorBlue, nil
+	case "magenta":
+		return ColorMagenta, nil
+	case "cyan":
+		return ColorCyan, nil
+	case "white":
+		return ColorWhite, nil
+	case "silver":
+		return ColorSilver, nil
+	case "gray":
+		return ColorGray, nil
+	case "maroon":
+		return ColorMaroon, nil
+	case "olive":
+		return ColorOlive, nil
+	case "lime":
+		return ColorLime, nil
+	case "teal":
+		return ColorTeal, nil
+	case "navy":
+		return ColorNavy, nil
+	case "purple":
+		return ColorPurple, nil
+	default:
+		return nil, fmt.Errorf("unknown color class %s", color)
+	}
+}
+
+// TeletextString expresses the color as a Teletext string
+func (c *Color) TeletextString() string {
+	if c == nil {
+		return ""
+	}
+	switch c {
+	case ColorBlack:
+		return string([]byte{0})
+	case ColorRed:
+		return string([]byte{1})
+	case ColorGreen:
+		return string([]byte{2})
+	case ColorYellow:
+		return string([]byte{3})
+	case ColorBlue:
+		return string([]byte{4})
+	case ColorMagenta:
+		return string([]byte{5})
+	case ColorCyan:
+		return string([]byte{6})
+	case ColorWhite:
+		return string([]byte{7})
+	default:
+		return ""
+	}
+}
+
 // newColorFromSSAString builds a new color based on an SSA string
 func newColorFromSSAString(s string, base int) (c *Color, err error) {
 	var i int64
@@ -352,6 +418,8 @@ func (sa *StyleAttributes) propagateSSAAttributes() {}
 func (sa *StyleAttributes) propagateSTLAttributes() {
 	if sa.STLJustification != nil {
 		switch *sa.STLJustification {
+		case JustificationUnchanged:
+			sa.WebVTTAlign = "start"
 		case JustificationCentered:
 			// default to middle anyway?
 		case JustificationRight:
@@ -428,6 +496,41 @@ func (sa *StyleAttributes) propagateWebVTTAttributes() {
 	sa.SRTBold = sa.WebVTTBold
 	sa.SRTItalics = sa.WebVTTItalics
 	sa.SRTUnderline = sa.WebVTTUnderline
+
+	// copy relevant attrs to STL ones
+	if sa.WebVTTAlign != "" {
+		switch sa.WebVTTAlign {
+		case "left":
+			sa.STLJustification = &JustificationLeft
+		case "right":
+			sa.STLJustification = &JustificationRight
+		case "center":
+			sa.STLJustification = &JustificationCentered
+		case "start":
+			sa.STLJustification = &JustificationUnchanged
+		}
+	}
+	for _, tag := range sa.WebVTTTags {
+		switch tag.Name {
+		case "c":
+			if len(tag.Classes) > 0 {
+				sa.TeletextColor, _ = newColorFromVTTClass(tag.Classes[0])
+			}
+		}
+	}
+
+	if sa.WebVTTLine != "" {
+		line := strings.Trim(sa.WebVTTLine, "%")
+		if pct, err := strconv.Atoi(line); err == nil {
+			sa.STLPosition = &STLPosition{
+				MaxRows:          23,             // assume closed STL
+				VerticalPosition: 23*pct/100 + 2, // adding 2 instead of 1 to match STL->VTT conversion
+			}
+			if sa.STLPosition.VerticalPosition > 23 {
+				sa.STLPosition.VerticalPosition = 23
+			}
+		}
+	}
 }
 
 // Metadata represents metadata

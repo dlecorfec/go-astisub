@@ -27,7 +27,8 @@ func TestWebVTT(t *testing.T) {
 	assert.Equal(t, s.Regions["bill"], s.Items[0].Region)
 	assert.Equal(t, s.Regions["fred"], s.Items[1].Region)
 	// Styles
-	assert.Equal(t, astisub.StyleAttributes{WebVTTAlign: "left", WebVTTPosition: "10%,start", WebVTTSize: "35%"}, *s.Items[1].InlineStyle)
+	var stlJustifLeft astisub.Justification = 2
+	assert.Equal(t, astisub.StyleAttributes{WebVTTAlign: "left", WebVTTPosition: "10%,start", WebVTTSize: "35%", STLJustification: &stlJustifLeft}, *s.Items[1].InlineStyle)
 
 	// No subtitles to write
 	w := &bytes.Buffer{}

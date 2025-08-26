@@ -460,7 +460,7 @@ func parseGSIBlock(b []byte) (g *gsiBlock, err error) {
 	// Revision number
 	if v := strings.TrimSpace(string(b[236:238])); len(v) > 0 {
 		if g.revisionNumber, err = strconv.Atoi(v); err != nil {
-			err = fmt.Errorf("astisub: atoi of %s failed: %w", v, err)
+			err = fmt.Errorf("revisionNumber: atoi of %s failed: %w", v, err)
 			return
 		}
 	}
@@ -468,7 +468,7 @@ func parseGSIBlock(b []byte) (g *gsiBlock, err error) {
 	// Total number of TTI blocks
 	if v := strings.TrimSpace(string(b[238:243])); len(v) > 0 {
 		if g.totalNumberOfTTIBlocks, err = strconv.Atoi(v); err != nil {
-			err = fmt.Errorf("astisub: atoi of %s failed: %w", v, err)
+			err = fmt.Errorf("totalNumberOfTTIBlocks: atoi of %s failed: %w", v, err)
 			return
 		}
 	}
@@ -476,7 +476,7 @@ func parseGSIBlock(b []byte) (g *gsiBlock, err error) {
 	// Total number of subtitles
 	if v := strings.TrimSpace(string(b[243:248])); len(v) > 0 {
 		if g.totalNumberOfSubtitles, err = strconv.Atoi(v); err != nil {
-			err = fmt.Errorf("astisub: atoi of %s failed: %w", v, err)
+			err = fmt.Errorf("totalNumberOfSubtitles: atoi of %s failed: %w", v, err)
 			return
 		}
 	}
@@ -484,7 +484,7 @@ func parseGSIBlock(b []byte) (g *gsiBlock, err error) {
 	// Total number of subtitle groups
 	if v := strings.TrimSpace(string(b[248:251])); len(v) > 0 {
 		if g.totalNumberOfSubtitleGroups, err = strconv.Atoi(v); err != nil {
-			err = fmt.Errorf("astisub: atoi of %s failed: %w", v, err)
+			err = fmt.Errorf("totalNumberOfSubtitleGroups: atoi of %s failed: %w", v, err)
 			return
 		}
 	}
@@ -492,7 +492,7 @@ func parseGSIBlock(b []byte) (g *gsiBlock, err error) {
 	// Maximum number of displayable characters in any text row
 	if v := strings.TrimSpace(string(b[251:253])); len(v) > 0 {
 		if g.maximumNumberOfDisplayableCharactersInAnyTextRow, err = strconv.Atoi(v); err != nil {
-			err = fmt.Errorf("astisub: atoi of %s failed: %w", v, err)
+			err = fmt.Errorf("maximumNumberOfDisplayableCharactersInAnyTextRow: atoi of %s failed: %w", v, err)
 			return
 		}
 	}
@@ -500,7 +500,7 @@ func parseGSIBlock(b []byte) (g *gsiBlock, err error) {
 	// Maximum number of displayable rows
 	if v := strings.TrimSpace(string(b[253:255])); len(v) > 0 {
 		if g.maximumNumberOfDisplayableRows, err = strconv.Atoi(v); err != nil {
-			err = fmt.Errorf("astisub: atoi of %s failed: %w", v, err)
+			err = fmt.Errorf("maximumNumberOfDisplayableRows: atoi of %s failed: %w", v, err)
 			return
 		}
 	}
@@ -524,7 +524,7 @@ func parseGSIBlock(b []byte) (g *gsiBlock, err error) {
 	// Total number of disks
 	if v := strings.TrimSpace(string(b[272])); len(v) > 0 {
 		if g.totalNumberOfDisks, err = strconv.Atoi(v); err != nil {
-			err = fmt.Errorf("astisub: atoi of %s failed: %w", v, err)
+			err = fmt.Errorf("totalNumberOfDisks: atoi of %s failed: %w", v, err)
 			return
 		}
 	}
@@ -532,7 +532,7 @@ func parseGSIBlock(b []byte) (g *gsiBlock, err error) {
 	// Disk sequence number
 	if v := strings.TrimSpace(string(b[273])); len(v) > 0 {
 		if g.diskSequenceNumber, err = strconv.Atoi(v); err != nil {
-			err = fmt.Errorf("astisub: atoi of %s failed: %w", v, err)
+			err = fmt.Errorf("diskSequenceNumber: atoi of %s failed: %w", v, err)
 			return
 		}
 	}
@@ -587,28 +587,28 @@ func parseDurationSTL(i string, framerate int) (d time.Duration, err error) {
 	// Parse hours
 	var hours, hoursString = 0, i[0:2]
 	if hours, err = strconv.Atoi(hoursString); err != nil {
-		err = fmt.Errorf("astisub: atoi of %s failed: %w", hoursString, err)
+		err = fmt.Errorf("hours: atoi of %s failed: %w", hoursString, err)
 		return
 	}
 
 	// Parse minutes
 	var minutes, minutesString = 0, i[2:4]
 	if minutes, err = strconv.Atoi(minutesString); err != nil {
-		err = fmt.Errorf("astisub: atoi of %s failed: %w", minutesString, err)
+		err = fmt.Errorf("minutes: atoi of %s failed: %w", minutesString, err)
 		return
 	}
 
 	// Parse seconds
 	var seconds, secondsString = 0, i[4:6]
 	if seconds, err = strconv.Atoi(secondsString); err != nil {
-		err = fmt.Errorf("astisub: atoi of %s failed: %w", secondsString, err)
+		err = fmt.Errorf("seconds: atoi of %s failed: %w", secondsString, err)
 		return
 	}
 
 	// Parse frames
 	var frames, framesString = 0, i[6:8]
 	if frames, err = strconv.Atoi(framesString); err != nil {
-		err = fmt.Errorf("astisub: atoi of %s failed: %w", framesString, err)
+		err = fmt.Errorf("frames: atoi of %s failed: %w", framesString, err)
 		return
 	}
 
@@ -686,17 +686,25 @@ func newTTIBlock(i *Item, idx int) (t *ttiBlock) {
 	for _, l := range i.Lines {
 		var lineItems []string
 		for _, li := range l.Items {
+			if sa := li.InlineStyle; sa != nil {
+				if sa.TeletextColor != nil {
+					lineItems = append(lineItems, sa.TeletextColor.TeletextString())
+				}
+			}
 			lineItems = append(lineItems, li.STLString())
 		}
-		lines = append(lines, strings.Join(lineItems, " "))
+		line := strings.Join(lineItems, " ")
+		// assume closed (teletext) STL, so wrap text in a double 0b/0a box
+		line = string([]byte{0x0b, 0xb}) + string(encodeTextSTL(line)) + string([]byte{0x0a, 0xa})
+		lines = append(lines, line)
 	}
-	t.text = []byte(strings.Join(lines, string(rune(stlLineSeparator))))
+	t.text = []byte(strings.Join(lines, string([]byte{stlLineSeparator, stlLineSeparator})))
 	return
 }
 
 func stlJustificationCodeFromStyle(sa *StyleAttributes) byte {
 	if sa == nil || sa.STLJustification == nil {
-		return stlJustificationCodeLeftJustifiedText
+		return stlJustificationCodeCentredText
 	}
 	switch *sa.STLJustification {
 	case JustificationCentered:
@@ -708,7 +716,7 @@ func stlJustificationCodeFromStyle(sa *StyleAttributes) byte {
 	case JustificationUnchanged:
 		return stlJustificationCodeUnchangedPresentation
 	default:
-		return stlJustificationCodeLeftJustifiedText
+		return stlJustificationCodeCentredText
 	}
 }
 
@@ -757,15 +765,15 @@ func (t *ttiBlock) bytes(g *gsiBlock) (o []byte) {
 	o = append(o, byte(uint8(t.subtitleGroupNumber))) // Subtitle group number
 	var b = make([]byte, 2)
 	binary.LittleEndian.PutUint16(b, uint16(t.subtitleNumber))
-	o = append(o, b...)                                                                                              // Subtitle number
-	o = append(o, byte(uint8(t.extensionBlockNumber)))                                                               // Extension block number
-	o = append(o, t.cumulativeStatus)                                                                                // Cumulative status
-	o = append(o, formatDurationSTLBytes(t.timecodeIn, g.framerate)...)                                              // Timecode in
-	o = append(o, formatDurationSTLBytes(t.timecodeOut, g.framerate)...)                                             // Timecode out
-	o = append(o, validateVerticalPosition(t.verticalPosition, g.displayStandardCode))                               // Vertical position
-	o = append(o, t.justificationCode)                                                                               // Justification code
-	o = append(o, t.commentFlag)                                                                                     // Comment flag
-	o = append(o, astikit.BytesPad(encodeTextSTL(string(t.text)), '\x8f', 112, astikit.PadRight, astikit.PadCut)...) // Text field
+	o = append(o, b...)                                                                       // Subtitle number
+	o = append(o, byte(uint8(t.extensionBlockNumber)))                                        // Extension block number
+	o = append(o, t.cumulativeStatus)                                                         // Cumulative status
+	o = append(o, formatDurationSTLBytes(t.timecodeIn, g.framerate)...)                       // Timecode in
+	o = append(o, formatDurationSTLBytes(t.timecodeOut, g.framerate)...)                      // Timecode out
+	o = append(o, validateVerticalPosition(t.verticalPosition, g.displayStandardCode))        // Vertical position
+	o = append(o, t.justificationCode)                                                        // Justification code
+	o = append(o, t.commentFlag)                                                              // Comment flag
+	o = append(o, astikit.BytesPad(t.text, '\x8f', 112, astikit.PadRight, astikit.PadCut)...) // Text field
 	return
 }
 
